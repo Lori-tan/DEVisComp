@@ -1,0 +1,12 @@
+Package: DEVisComp
+Type: Package
+Title: Visualize and Compare Differential Analysis Results from DESeq2 and edgeR
+Version: 0.1.0
+Author: person("Luomeng", "Tan", email = "luomeng.tan@mail.utoronto.ca", role = c("aut", "cre"))
+Maintainer: Luomeng Tan <luomeng.tan@mail.utoronto.ca>
+Description: Create heatmaps and do clustering on the differential analysis output from 
+    DESeq2 or edgeR (including read counts, LFC, padj). Compare the results from DESeq2
+    and edgeR.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
