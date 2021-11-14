@@ -13,6 +13,9 @@
 #'    the order.  Default: NULL.
 #' @param tool The tool used for DGE analysis, "DESeq2" or "edgeR".
 #'
+#' @return Plots three heatmaps side by side, in the order of normalized counts,
+#'    log fold change, and padj.
+#'
 #' @examples
 #' # Example 1: DGE analysis result from DESeq2
 #' # Using airwayCounts and airwayMetadata available with package
@@ -55,9 +58,9 @@
 #' res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 #'
 #' # plot heatmaps
-#' ClusterTogether(normalized_counts = normalized_counts,
-#'                             DE_result = res,
-#'                             tool = "edgeR")
+#' # ClusterTogether(normalized_counts = normalized_counts,
+#' #                             DE_result = res,
+#' #                            tool = "edgeR")
 #'
 #' @export
 #' @import stats

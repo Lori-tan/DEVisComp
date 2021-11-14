@@ -19,6 +19,10 @@ the order.  Default: NULL.}
 
 \item{tool}{The tool used for DGE analysis, "DESeq2" or "edgeR".}
 }
+\value{
+Plots three heatmaps side by side, in the order of normalized counts,
+log fold change, and padj.
+}
 \description{
 A function to draw the clustered heatmaps for normalized counts, log fold
 changes, and adjusted p-values obtained from differential gene expression
@@ -66,8 +70,8 @@ lrt <- edgeR::glmLRT(fit)
 res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 
 # plot heatmaps
-ClusterTogether(normalized_counts = normalized_counts,
-                            DE_result = res,
-                            tool = "edgeR")
+# ClusterTogether(normalized_counts = normalized_counts,
+#                             DE_result = res,
+#                            tool = "edgeR")
 
 }
