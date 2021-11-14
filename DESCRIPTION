@@ -13,6 +13,9 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Suggests: 
+    apeglm,
+    DESeq2,
+    edgeR,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
@@ -21,3 +24,5 @@ Imports:
     stats,
     grDevices,
     RColorBrewer
+Depends: 
+    R (>= 2.10)

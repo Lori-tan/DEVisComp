@@ -2,26 +2,72 @@
 % Please edit documentation in R/clusterTogether.R
 \name{ClusterTogether}
 \alias{ClusterTogether}
-\title{Cluster}
+\title{Draw clustered heatmaps for DGE results.}
 \usage{
-ClusterTogether(normalized_counts, DE_res, order, tool)
+ClusterTogether(normalized_counts, DE_result, order = NULL, tool)
 }
 \arguments{
-\item{normalized_counts}{The count}
+\item{normalized_counts}{The normailized counts of the RNA-seq data.}
 
-\item{DE_res}{The result from DESeq2 or edgeR}
+\item{DE_result}{The result from DESeq2 or edgeR, which should be a DESeqResults
+object or a data frame taken from the table component of the returned value
+of edgeR topTags function (edgeR::topTags(..)$table).}
 
-\item{order}{the clustering order}
+\item{order}{The clustering order. If not provided, the function will cluster
+with correlation and complete method based on the normalized counts to obtain
+the order.  Default: NULL.}
 
-\item{tool}{tool used for DGE analysis, "DESeq2" or "edgeR"}
+\item{tool}{The tool used for DGE analysis, "DESeq2" or "edgeR".}
 }
 \description{
-This is a function
+A function to draw the clustered heatmaps for normalized counts, log fold
+changes, and adjusted p-values obtained from differential gene expression
+analysis results with DESeq2 or edgeR.
 }
 \examples{
-# empty
+# Example 1: DGE analysis result from DESeq2
+# Using airwayCounts and airwayMetadata available with package
+# perform DGE analysis with DESeq2
+dds <- DESeq2::DESeqDataSetFromMatrix(countData=airwayCounts,
+                                      colData=airwayMetadata,
+                                      design=~dex,
+                                      tidy=TRUE)
+dds <- DESeq2::estimateSizeFactors(dds)
 
-}
-\references{
-empty
+normalized_counts <- DESeq2::counts(dds, normalized=TRUE)
+
+dds@colData$dex <- relevel(dds@colData$dex, ref = "control")
+dds <- DESeq2::DESeq(dds)
+
+res <- DESeq2::results(dds, tidy=TRUE)
+shrinkResult <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
+                                  type = "apeglm")
+# plot heatmaps
+ClusterTogether(normalized_counts = normalized_counts,
+                            DE_result = shrinkResult,
+                            tool = "DESeq2")
+
+# Example 2: DGE analysis result from edgeR
+# Using airwayCounts and airwayMetadata available with package
+counts <- data.frame(airwayCounts[,-1], row.names = airwayCounts$ensgene)
+
+# perform DGE analysis with edgeR
+diff_list <- edgeR::DGEList(counts, samples = airwayMetadata)
+
+normalized_counts <- edgeR::cpm(diff_list, normalized.lib.sizes = TRUE)
+
+dex <- factor(rep(c("control", "treated"), 4))
+design <- model.matrix(~dex)
+rownames(design) <- colnames(diff_list)
+
+diff_list <- edgeR::estimateDisp(diff_list, design, robust = TRUE)
+fit <- edgeR::glmFit(diff_list, design)
+lrt <- edgeR::glmLRT(fit)
+res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
+
+# plot heatmaps
+ClusterTogether(normalized_counts = normalized_counts,
+                            DE_result = res,
+                            tool = "edgeR")
+
 }
