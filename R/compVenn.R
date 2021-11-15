@@ -55,6 +55,19 @@ compVenn <- function(deseq2_result,
                      cutoff = 0.05,
                      filename = "DESeq2 vs edgeR.png") {
 
+  # Performing checks of user input
+  if (!setequal(rownames(deseq2_result), rownames(edger_result))) {
+    stop("deseq2_result should contain same genes as edger_result")
+  }
+
+  if (cutoff <= 0 | cutoff > 1) {
+    stop("Cutoff should be a positive number between 0 and 1.")
+  }
+
+  if (!is.character(filename)) {
+    stop("Filename should be characters.")
+  }
+
   # get all differentially expressed genes with a padj <= cutoff
   deseq2_diff_genes <- rownames(deseq2_result[which(
     deseq2_result$padj <= cutoff & deseq2_result$log2FoldChange != 0),])

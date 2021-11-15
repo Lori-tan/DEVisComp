@@ -2,15 +2,14 @@
 #'
 #' A function to draw the clustered heatmaps for normalized counts, log fold
 #' changes, and adjusted p-values obtained from differential gene expression
-#' analysis results with DESeq2 or edgeR.
+#' analysis results with DESeq2 or edgeR. The function clusters with
+#' correlation and complete method based on the normalized counts to obtain the
+#' clustering order.
 #'
 #' @param normalized_counts The normailized counts of the RNA-seq data.
 #' @param DE_result The result from DESeq2 or edgeR, which should be a DESeqResults
 #'    object or a data frame taken from the table component of the returned value
 #'    of edgeR topTags function (edgeR::topTags(..)$table).
-#' @param order The clustering order. If not provided, the function will cluster
-#'    with correlation and complete method based on the normalized counts to obtain
-#'    the order.  Default: NULL.
 #' @param tool The tool used for DGE analysis, "DESeq2" or "edgeR".
 #'
 #' @return Plots three heatmaps side by side, in the order of normalized counts,
@@ -71,7 +70,6 @@
 
 ClusterTogether <- function(normalized_counts,
                             DE_result,
-                            order = NULL,
                             tool) {
 
   # Performing checks of user input
@@ -81,7 +79,33 @@ ClusterTogether <- function(normalized_counts,
   }
 
   if (!is.matrix(normalized_counts) & !is.data.frame(normalized_counts)) {
-    stop("Normalized_counts should be a  matirx or data frame.")
+    stop("Normalized_counts should be a matirx or data frame.")
+  }
+
+  if (!setequal(rownames(normalized_counts), rownames(DE_result))) {
+    stop("Rownames of normalized_counts should matches the rownames of DE_result,
+         i.e. they should contain same genes.")
+  }
+
+  if (tool != "DESeq2" & tool != "edgeR") {
+    stop("Tool should be either DESeq2 or edgeR.")
+  }
+
+  if (tool == "DESeq2" & !"DESeqResults" %in% class(DE_result)) {
+    stop("DE_result should be a DESeqResults object.")
+  }
+
+  if (tool == "edgeR" & (!is.data.frame(DE_result) |
+       !all(attributes(DE_result)$names == c("logFC",
+                                              "logCPM",
+                                              "LR",
+                                              "PValue",
+                                              "FDR")
+            )
+       )
+      ) {
+    stop("DE_result should be a data frame taken from the table component of the
+         returned value of edgeR topTags function.")
   }
 
   # get the significant genes (adjusted p-value <= 0.05) that are differentially
@@ -101,29 +125,29 @@ ClusterTogether <- function(normalized_counts,
 
   # if the user doesn't provide clustering order, we cluster based on the
   # normalized counts of one replicate (control vs treated) and get the order
-  if (is.null(order)) {
-    # we only want the rows with a non-zero SD for clustering purpose
-    SD <- apply(diff_counts[, c(1, 2)], 1, stats::sd)
-    if (length(which(SD == 0)) != 0) {
-      diff_counts <- diff_counts[-which(SD == 0), ]
-    }
 
-    p <- pheatmap::pheatmap(diff_counts[, c(1, 2)],
-                  cluster_cols=FALSE,
-                  cluster_rows=TRUE,
-                  clustering_distance_rows = 'correlation',
-                  clustering_method = 'complete',
-                  cellwidth = 10,
-                  fontsize = 6,
-                  angle_col = c('315'),
-                  border_color = "NA",
-                  show_rownames = FALSE,
-                  main = 'normalized count',
-                  cellheight = 0.3
-    )
-
-    order <- p$tree_row$order
+  # we only want the rows with a non-zero SD for clustering purpose
+  SD <- apply(diff_counts[, c(1, 2)], 1, stats::sd)
+  if (length(which(SD == 0)) != 0) {
+    diff_counts <- diff_counts[-which(SD == 0), ]
   }
+
+  p <- pheatmap::pheatmap(diff_counts[, c(1, 2)],
+                cluster_cols=FALSE,
+                cluster_rows=TRUE,
+                clustering_distance_rows = 'correlation',
+                clustering_method = 'complete',
+                cellwidth = 10,
+                fontsize = 6,
+                angle_col = c('315'),
+                border_color = "NA",
+                show_rownames = FALSE,
+                main = 'normalized count',
+                cellheight = 0.3
+  )
+
+  order <- p$tree_row$order
+
 
   # get heatmap for the counts
   # get the lower and upper limits used for color

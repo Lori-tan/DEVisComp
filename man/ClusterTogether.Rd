@@ -4,7 +4,7 @@
 \alias{ClusterTogether}
 \title{Draw clustered heatmaps for DGE results.}
 \usage{
-ClusterTogether(normalized_counts, DE_result, order = NULL, tool)
+ClusterTogether(normalized_counts, DE_result, tool)
 }
 \arguments{
 \item{normalized_counts}{The normailized counts of the RNA-seq data.}
@@ -12,10 +12,6 @@ ClusterTogether(normalized_counts, DE_result, order = NULL, tool)
 \item{DE_result}{The result from DESeq2 or edgeR, which should be a DESeqResults
 object or a data frame taken from the table component of the returned value
 of edgeR topTags function (edgeR::topTags(..)$table).}
-
-\item{order}{The clustering order. If not provided, the function will cluster
-with correlation and complete method based on the normalized counts to obtain
-the order.  Default: NULL.}
 
 \item{tool}{The tool used for DGE analysis, "DESeq2" or "edgeR".}
 }
@@ -26,7 +22,9 @@ log fold change, and padj.
 \description{
 A function to draw the clustered heatmaps for normalized counts, log fold
 changes, and adjusted p-values obtained from differential gene expression
-analysis results with DESeq2 or edgeR.
+analysis results with DESeq2 or edgeR. The function clusters with
+correlation and complete method based on the normalized counts to obtain the
+clustering order.
 }
 \examples{
 # Example 1: DGE analysis result from DESeq2
