@@ -3,6 +3,7 @@
 export(ClusterTogether)
 export(compMA)
 export(compVenn)
+export(compVolcano)
 import(RColorBrewer)
 import(VennDiagram)
 import(cowplot)
