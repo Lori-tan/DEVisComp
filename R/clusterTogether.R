@@ -57,9 +57,9 @@
 #' res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 #'
 #' # plot heatmaps
-#' # ClusterTogether(normalized_counts = normalized_counts,
-#' #                             DE_result = res,
-#' #                            tool = "edgeR")
+#' ClusterTogether(normalized_counts = normalized_counts,
+#'                            DE_result = res,
+#'                            tool = "edgeR")
 #'
 #' @export
 #' @import stats
