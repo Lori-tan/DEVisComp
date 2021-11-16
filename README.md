@@ -81,6 +81,15 @@ as a glucocorticoid responsive gene that modulates cytokine function in
 airway smooth muscle cells. *PloS one, 9*(6), e99625.
 <https://doi.org/10.1371/journal.pone.0099625>
 
+Love, M. I., Huber, W., & Anders, S. (2014). Moderated estimation of
+fold change and dispersion for RNA-seq data with DESeq2. *Genome
+Biology, 15*(12), 550. <https://doi.org/10.1186/s13059-014-0550-8>
+
+Robinson, M. D., McCarthy, D. J., & Smyth, G. K. (2010). edgeR: A
+Bioconductor package for differential expression analysis of digital
+gene expression data. *Bioinformatics, 26*(1), 139–140.
+<https://doi.org/10.1093/bioinformatics/btp616>
+
 ## Acknowledgements
 
 This package was developed as part of an assessment for 2021 BCB410H:
