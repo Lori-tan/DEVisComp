@@ -129,6 +129,8 @@ ClusterTogether <- function(normalized_counts,
   # we only want the rows with a non-zero SD for clustering purpose
   SD <- apply(diff_counts[, c(1, 2)], 1, stats::sd)
   if (length(which(SD == 0)) != 0) {
+    warning(sprintf("Removing %d rows when clustering due to zero SD in the first two column of normalized counts.",
+                    length(which(SD == 0)) != 0))
     diff_counts <- diff_counts[-which(SD == 0), ]
   }
 
