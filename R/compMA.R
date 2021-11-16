@@ -129,7 +129,7 @@ compMA <- function(deseq2_result,
     ggplot2::ylim(c(min(deseq2_data$log2FoldChange),
                     max(deseq2_data$log2FoldChange))) +
     ggplot2::xlim(c(0.1, 50000)) +
-    ggplot2::ggtitle("plot with DESeq2 data")  +
+    ggplot2::ggtitle("log-fold change vs. expression in DESeq2 data")  +
     ggplot2::scale_color_manual(values = c("  None" = "grey",
                                   "  deseq2" = "#E69F00",
                                   "  deseq2 edgeR" = "#009E73",
@@ -146,7 +146,7 @@ compMA <- function(deseq2_result,
                         colour = "blue", size = 0.5) +
     ggplot2::ylim(c(min(edger_data$logFC), max(edger_data$logFC))) +
     ggplot2::xlim(c(min(edger_data$logCPM), max(edger_data$logCPM))) +
-    ggplot2::ggtitle("plot with edgeR data")  +
+    ggplot2::ggtitle("log-fold change vs. expression in edgeR data")  +
     ggplot2::scale_color_manual(values = c("  None" = "grey",
                                   "  deseq2" = "#E69F00",
                                   "  deseq2 edgeR" = "#009E73",

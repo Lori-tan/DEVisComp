@@ -129,7 +129,7 @@ compVolcano <- function(deseq2_result,
     ggplot2::xlim(c(min(deseq2_data$log2FoldChange),
                     max(deseq2_data$log2FoldChange))) +
     ggplot2::ylim(c(min(deseq2_data$padj), max(deseq2_data$padj))) +
-    ggplot2::labs(title="genes over mig-32 in deseq2",
+    ggplot2::labs(title="adjusted p-value vs. log-fold change in DESeq2 data",
                   x="log2 fold change",
                   y="-log10 padj") +
     ggplot2::scale_color_manual(values = c("  None" = "grey",
@@ -149,7 +149,7 @@ compVolcano <- function(deseq2_result,
     ggplot2::geom_point(alpha=1, size=0.2) +
     ggplot2::xlim(c(min(edger_data$logFC), max(edger_data$logFC))) +
     ggplot2::ylim(c(min(edger_data$FDR), max(edger_data$FDR))) +
-    ggplot2::labs(title="genes over mig-32 in deseq2",
+    ggplot2::labs(title="adjusted p-value vs. log-fold change in edgeR data",
                   x="log2 fold change",
                   y="-log10 padj") +
     ggplot2::scale_color_manual(values = c("  None" = "grey",
