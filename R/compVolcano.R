@@ -60,11 +60,25 @@ compVolcano <- function(deseq2_result,
 
   # Performing checks of user input
   if (!setequal(rownames(deseq2_result), rownames(edger_result))) {
-    stop("deseq2_result should contain same genes as edger_result")
+    stop("deseq2_result should contain same genes as edger_result.")
   }
 
   if (cutoff <= 0 | cutoff > 1) {
     stop("Cutoff should be a positive number between 0 and 1.")
+  }
+
+  if (!"DESeqResults" %in% class(deseq2_result)) {
+    stop("deseq2_result should be a DESeqResults object.")
+  }
+
+  if ((!is.data.frame(edger_result) |
+       !all(attributes(edger_result)$names == c("logFC",
+                                                "logCPM",
+                                                "LR",
+                                                "PValue",
+                                                "FDR")))) {
+    stop("edger_result should be a data frame taken from the table component of the
+         returned value of edgeR topTags function.")
   }
 
   # get all differentially expressed genes with a padj <= cutoff
