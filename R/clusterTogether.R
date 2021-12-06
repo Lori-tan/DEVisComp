@@ -123,7 +123,7 @@ ClusterTogether <- function(normalizedCounts,
          returned value of edgeR topTags function.")
   }
 
-  # == Body ====
+  # == Set up ====
   # get the significant genes (adjusted p-value <= 0.05) that are
   # differentially expressed
   if (tool == "DESeq2") {
@@ -166,8 +166,21 @@ ClusterTogether <- function(normalizedCounts,
 
   order <- p$tree_row$order
 
+  # re-order the DE result
+  reorderedResults <- diffDf[match(rownames(diffCounts[order,]),
+                                   rownames(diffDf)),]
 
-  # get heatmap for the counts
+  if (tool == "DESeq2"){
+    lfc <- reorderedResults$log2FoldChange
+    padj <- reorderedResults$padj
+  } else if (tool == "edgeR") {
+    lfc <- reorderedResults$logFC
+    padj <- reorderedResults$FDR
+  }
+
+  # == plot ====
+
+  # == 1 get heatmap for the counts ====
   # get the lower and upper limits used for color
   limit <- stats::quantile(diffCounts, probs = c(0.05, 0.95))
   myColors <- c(limit[1] - 0.01,
@@ -192,19 +205,7 @@ ClusterTogether <- function(normalizedCounts,
                 breaks = myColors
   )
 
-  # re-order the DE result
-  reorderedResults <- diffDf[match(rownames(diffCounts[order,]),
-                                     rownames(diffDf)),]
-
-  if (tool == "DESeq2"){
-    lfc <- reorderedResults$log2FoldChange
-    padj <- reorderedResults$padj
-  } else if (tool == "edgeR") {
-    lfc <- reorderedResults$logFC
-    padj <- reorderedResults$FDR
-  }
-
-  # get heatmap for log 2 fold change
+  # == 2 get heatmap for log 2 fold change ====
   limit <- stats::quantile(lfc, probs = c(0.05, 0.95))
   myColors <- c(limit[1] - 0.01,
                  seq(limit[1], limit[2], by=0.01),
@@ -230,7 +231,7 @@ ClusterTogether <- function(normalizedCounts,
                  breaks = myColors
   )
 
-  # get heatmap for adjusted p-value
+  # == 3 get heatmap for adjusted p-value ====
   myColors <- c(seq(0,0.05,by=0.0001), 0.0501)
   myPalette <- c(grDevices::colorRampPalette(colors = c("yellow", "red"))
                   (n = length(myColors)-2), 'red')
@@ -251,7 +252,7 @@ ClusterTogether <- function(normalizedCounts,
                  breaks = myColors
   )
 
-  # plot three heatmaps side by side
+  # == 4 plot three heatmaps side by side ====
   cowplot::plot_grid(p1[[4]], p2[[4]], p3[[4]], nrow = 1, ncol = 3)
 }
 
