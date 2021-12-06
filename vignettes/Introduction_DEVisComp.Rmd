@@ -67,43 +67,43 @@ There are 4 functions in the package, and all functions require DESeq2 and/or ed
   dds <- DESeq2::estimateSizeFactors(dds)
   
   # get the normalized counts
-  deseq2_normalized_counts <- DESeq2::counts(dds, normalized=TRUE)
+  deseq2NormalizedCounts <- DESeq2::counts(dds, normalized=TRUE)
 
   dds@colData$dex <- relevel(dds@colData$dex, ref = "control")
   dds <- DESeq2::DESeq(dds, quiet = TRUE)
   res <- DESeq2::results(dds, tidy=TRUE)
   
   # get the reuslt we need as input
-  deseq2_result <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
+  deseq2Result <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
                                      type = "apeglm", quiet = TRUE)
 ```
 
 ```
   # edgeR workflow
   counts <- data.frame(airwayCounts[,-1], row.names = airwayCounts$ensgene)
-  diff_list <- edgeR::DGEList(counts, samples = airwayMetadata)
+  diffList <- edgeR::DGEList(counts, samples = airwayMetadata)
   
   # get the normalized counts
-  edger_normalized_counts <- edgeR::cpm(diff_list, normalized.lib.sizes = TRUE)
+  edgerNormalizedCounts <- edgeR::cpm(diffList, normalized.lib.sizes = TRUE)
   
   dex <- factor(rep(c("control", "treated"), 4))
   design <- model.matrix(~dex)
-  rownames(design) <- colnames(diff_list)
-  diff_list <- edgeR::estimateDisp(diff_list, design, robust = TRUE)
+  rownames(design) <- colnames(diffList)
+  diffList <- edgeR::estimateDisp(diffList, design, robust = TRUE)
   
-  fit <- edgeR::glmFit(diff_list, design)
+  fit <- edgeR::glmFit(diffList, design)
   lrt <- edgeR::glmLRT(fit)
   
   # get the reuslt we need as input
-  edger_result <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
+  edgerResult <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 ```
 
 ### ClusterTogether
 The __*ClusterTogether*__ function generates 3 heatmaps side-by-side showing the patterns among gene expression, log-fold changes, and adjusted p-values of the differntially expressed genes. More information could be viewed in `?ClusterTogether`.
 
 ```
-ClusterTogether(normalized_counts = deseq2_normalized_counts,
-                             DE_result = deseq2_result,
+ClusterTogether(normalizedCounts = deseq2NormalizedCounts,
+                             DEResult = deseq2Result,
                              tool = "DESeq2")
 ```
 
@@ -111,8 +111,8 @@ ClusterTogether(normalized_counts = deseq2_normalized_counts,
 
 
 ```
-ClusterTogether(normalized_counts = edger_normalized_counts,
-                             DE_result = edger_result,
+ClusterTogether(normalizedCounts = edgerNormalizedCounts,
+                             DEResult = edgerResult,
                              tool = "edgeR")
 ```
 
@@ -122,8 +122,8 @@ ClusterTogether(normalized_counts = edger_normalized_counts,
 The __*compVenn*__ is the function that create a Venn diagram comparing the genes that are marked as differentially expressed by DESeq2 and edgeR. More information could be viewed in `?compVenn`.
 
 ```
-compVenn(deseq2_result = deseq2_result,
-         edger_result = edger_result,
+compVenn(deseq2Result = deseq2Result,
+         edgerResult = edgerResult,
          cutoff = 0.05)
 ```
 
@@ -133,8 +133,8 @@ compVenn(deseq2_result = deseq2_result,
 The __*compMA*__ generate MA plots for results created by DESeq2 and edgeR. More information could be viewed in `?compMA`.
 
 ```
-compMA(deseq2_result = deseq2_result,
-         edger_result = edger_result,
+compMA(deseq2Result = deseq2Result,
+         edgerResult = edgerResult,
          cutoff = 0.05)
 ```
 
@@ -144,8 +144,8 @@ compMA(deseq2_result = deseq2_result,
 The __*compVolcano*__ generate Volcano plots for results created by DESeq2 and edgeR. More information could be viewed in `?compVolcano`.
 
 ```
-compVolcano(deseq2_result = deseq2_result,
-         edger_result = edger_result,
+compVolcano(deseq2Result = deseq2Result,
+         edgerResult = edgerResult,
          cutoff = 0.05)
 ```
 
