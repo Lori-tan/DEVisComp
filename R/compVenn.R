@@ -10,7 +10,8 @@
 #' @param cutoff padj cutoff. Default: 0.05
 #' @param filename Filename for image output. Default: "DESeq2 vs edgeR.png".
 #'
-#' @return Plots a figure to the file given by the filename argument.
+#' @return A png file and a log file will be created in the working directory
+#'    with the given filename.
 #'
 #' @examples
 #' # Using airwayCounts and airwayMetadata available with package
@@ -44,6 +45,7 @@
 #' edgerRes <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 #'
 #' # make the Venn diagram
+#' # a png file and a log file will be created in your working directory
 #' # compVenn(deseq2Result = deseq2Res,
 #' #          edgerResult = edgerRes)
 #'

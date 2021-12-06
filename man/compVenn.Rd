@@ -22,7 +22,8 @@ value of edgeR topTags function (edgeR::topTags(..)$table).}
 \item{filename}{Filename for image output. Default: "DESeq2 vs edgeR.png".}
 }
 \value{
-Plots a figure to the file given by the filename argument.
+A png file and a log file will be created in the working directory
+with the given filename.
 }
 \description{
 A function to make a Venn diagram of the differentially expressed genes got from
@@ -61,6 +62,7 @@ lrt <- edgeR::glmLRT(fit)
 edgerRes <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 
 # make the Venn diagram
+# a png file and a log file will be created in your working directory
 # compVenn(deseq2Result = deseq2Res,
 #          edgerResult = edgerRes)
 
