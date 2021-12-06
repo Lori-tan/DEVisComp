@@ -47,6 +47,11 @@
 #' # compVenn(deseq2Result = deseq2Res,
 #' #          edgerResult = edgerRes)
 #'
+#' @references
+#'
+#' Chen, H. (2021). VennDiagram: Generate High-Resolution Venn and Euler Plots.
+#' R package version 1.7.0. https://CRAN.R-project.org/package=VennDiagram
+#'
 #' @export
 #' @import VennDiagram
 

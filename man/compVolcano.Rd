@@ -62,3 +62,10 @@ compVolcano(deseq2Result = deseq2Res,
        edgerResult = edgerRes)
 
 }
+\references{
+Auguie, B. (2017). gridExtra: Miscellaneous Functions for "Grid" Graphics.
+R package version 2.3. https://CRAN.R-project.org/package=gridExtra
+
+Wickham H. (2016). ggplot2: Elegant Graphics for Data Analysis.
+Springer-Verlag New York.
+}

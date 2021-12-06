@@ -61,6 +61,21 @@
 #'                            DEResult = res,
 #'                            tool = "edgeR")
 #'
+#' @references
+#' Kolde, R. (2019). pheatmap: Pretty Heatmaps. R package version 1.0.12.
+#' https://CRAN.R-project.org/package=pheatmap
+#'
+#' Neuwirth, E. (2014). RColorBrewer: ColorBrewer Palettes. R package
+#' version 1.1-2. https://CRAN.R-project.org/package=RColorBrewer
+#'
+#' R Core Team (2021). R: A language and environment for statistical
+#' computing. R Foundation for Statistical Computing, Vienna, Austria. URL
+#' https://www.R-project.org/.
+#'
+#' Wilke, C. O. (2020). cowplot: Streamlined Plot Theme and Plot Annotations
+#' for 'ggplot2'. R package version 1.1.1.
+#' https://CRAN.R-project.org/package=cowplot
+#'
 #' @export
 #' @import stats
 #' @import pheatmap

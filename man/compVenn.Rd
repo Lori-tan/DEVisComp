@@ -65,3 +65,7 @@ edgerRes <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 #          edgerResult = edgerRes)
 
 }
+\references{
+Chen, H. (2021). VennDiagram: Generate High-Resolution Venn and Euler Plots.
+R package version 1.7.0. https://CRAN.R-project.org/package=VennDiagram
+}
