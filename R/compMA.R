@@ -7,8 +7,8 @@
 #' The results are meaningful to compare different tools only when the parameters
 #' used for both tools when performing the DGE analysis are similar.
 #'
-#' @param deseq2_result The result from DESeq2, a DESeqResults object.
-#' @param edger_result A data frame taken from the table component of the returned
+#' @param deseq2Result The result from DESeq2, a DESeqResults object.
+#' @param edgerResult A data frame taken from the table component of the returned
 #'    value of edgeR topTags function (edgeR::topTags(..)$table).
 #' @param cutoff padj cutoff. Default: 0.05
 #'
@@ -29,105 +29,105 @@
 #' dds <- DESeq2::DESeq(dds)
 #'
 #' res <- DESeq2::results(dds, tidy=TRUE)
-#' deseq2_res <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
+#' deseq2Res <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
 #'                                   type = "apeglm")
 #'
 #' # perform DGE analysis with edgeR
 #' counts <- data.frame(airwayCounts[,-1], row.names = airwayCounts$ensgene)
 #'
-#' diff_list <- edgeR::DGEList(counts, samples = airwayMetadata)
+#' diffList <- edgeR::DGEList(counts, samples = airwayMetadata)
 #'
 #' dex <- factor(rep(c("control", "treated"), 4))
 #' design <- model.matrix(~dex)
-#' rownames(design) <- colnames(diff_list)
+#' rownames(design) <- colnames(diffList)
 #'
-#' diff_list <- edgeR::estimateDisp(diff_list, design, robust = TRUE)
-#' fit <- edgeR::glmFit(diff_list, design)
+#' diffList <- edgeR::estimateDisp(diffList, design, robust = TRUE)
+#' fit <- edgeR::glmFit(diffList, design)
 #' lrt <- edgeR::glmLRT(fit)
-#' edger_res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
+#' edgerRes <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 #'
 #' # make the MA plots
-#' compMA(deseq2_result = deseq2_res,
-#'        edger_result = edger_res)
+#' compMA(deseq2Result = deseq2Res,
+#'        edgerResult = edgerRes)
 #'
 #' @export
 #' @import ggplot2
 #' @import gridExtra
 
-compMA <- function(deseq2_result,
-                   edger_result,
+compMA <- function(deseq2Result,
+                   edgerResult,
                    cutoff = 0.05) {
 
   # Performing checks of user input
-  if (!setequal(rownames(deseq2_result), rownames(edger_result))) {
-    stop("deseq2_result should contain same genes as edger_result.")
+  if (!setequal(rownames(deseq2Result), rownames(edgerResult))) {
+    stop("deseq2Result should contain same genes as edgerResult.")
   }
 
   if (cutoff <= 0 | cutoff > 1) {
     stop("Cutoff should be a positive number between 0 and 1.")
   }
 
-  if (!"DESeqResults" %in% class(deseq2_result)) {
-    stop("deseq2_result should be a DESeqResults object.")
+  if (!"DESeqResults" %in% class(deseq2Result)) {
+    stop("deseq2Result should be a DESeqResults object.")
   }
 
-  if ((!is.data.frame(edger_result) |
-       !all(attributes(edger_result)$names == c("logFC",
+  if ((!is.data.frame(edgerResult) |
+       !all(attributes(edgerResult)$names == c("logFC",
                                                 "logCPM",
                                                 "LR",
                                                 "PValue",
                                                 "FDR")))) {
-    stop("edger_result should be a data frame taken from the table component of the
+    stop("edgerResult should be a data frame taken from the table component of the
          returned value of edgeR topTags function.")
   }
 
   # get all differentially expressed genes with a padj <= cutoff
-  deseq2_diff_genes <- rownames(deseq2_result[which(
-    deseq2_result$padj <= cutoff & deseq2_result$log2FoldChange != 0),])
+  deseq2DiffGenes <- rownames(deseq2Result[which(
+    deseq2Result$padj <= cutoff & deseq2Result$log2FoldChange != 0),])
 
-  edger_diff_genes <- rownames(edger_result[which(
-    edger_result$FDR <= cutoff & edger_result$logFC != 0),])
+  edgerDiffGenes <- rownames(edgerResult[which(
+    edgerResult$FDR <= cutoff & edgerResult$logFC != 0),])
 
-  all_diff_genes <- union(deseq2_diff_genes, edger_diff_genes)
+  allDiffGenes <- union(deseq2DiffGenes, edgerDiffGenes)
 
   # Mark genes by the tools which consider them as differentially expressed
   # first use the result data from DESeq2
-  deseq2_data <- as.data.frame(cbind(deseq2_result,  tool=" "))
+  deseq2Data <- as.data.frame(cbind(deseq2Result,  tool=" "))
 
-  sel <- match(deseq2_diff_genes, rownames(deseq2_data))
-  deseq2_data$tool[sel] <- paste(deseq2_data$tool[sel], "deseq2", sep = " ")
+  sel <- match(deseq2DiffGenes, rownames(deseq2Data))
+  deseq2Data$tool[sel] <- paste(deseq2Data$tool[sel], "deseq2", sep = " ")
 
-  sel <- match(edger_diff_genes, rownames(deseq2_data))
-  deseq2_data$tool[sel] <- paste(deseq2_data$tool[sel], "edgeR", sep = " ")
+  sel <- match(edgerDiffGenes, rownames(deseq2Data))
+  deseq2Data$tool[sel] <- paste(deseq2Data$tool[sel], "edgeR", sep = " ")
 
-  sel <- which(deseq2_data$tool == " ")
-  deseq2_data$tool[sel] <- "  None"
+  sel <- which(deseq2Data$tool == " ")
+  deseq2Data$tool[sel] <- "  None"
 
   # use the result data from edgeR
-  edger_data <- as.data.frame(cbind(edger_result,  tool=" "))
+  edgerData <- as.data.frame(cbind(edgerResult,  tool=" "))
 
-  sel <- match(deseq2_diff_genes, rownames(edger_data))
-  edger_data$tool[sel] <- paste(edger_data$tool[sel], "deseq2", sep = " ")
+  sel <- match(deseq2DiffGenes, rownames(edgerData))
+  edgerData$tool[sel] <- paste(edgerData$tool[sel], "deseq2", sep = " ")
 
-  sel <- match(edger_diff_genes, rownames(edger_data))
-  edger_data$tool[sel] <- paste(edger_data$tool[sel], "edgeR", sep = " ")
+  sel <- match(edgerDiffGenes, rownames(edgerData))
+  edgerData$tool[sel] <- paste(edgerData$tool[sel], "edgeR", sep = " ")
 
-  sel <- which(edger_data$tool == " ")
-  edger_data$tool[sel] <- "  None"
+  sel <- which(edgerData$tool == " ")
+  edgerData$tool[sel] <- "  None"
 
   # plot the MA plot, with the gene counts as x-axis and log 2 fold
   # change as y axis
-  baseMean <- deseq2_data$baseMean
-  log2FoldChange <- deseq2_data$log2FoldChange
-  tool <- deseq2_data$tool
+  baseMean <- deseq2Data$baseMean
+  log2FoldChange <- deseq2Data$log2FoldChange
+  tool <- deseq2Data$tool
 
-  m1 <- ggplot2::ggplot(data=deseq2_data,
+  m1 <- ggplot2::ggplot(data=deseq2Data,
                         ggplot2::aes(x=baseMean, y=log2FoldChange, color=tool)) +
     ggplot2::geom_point(alpha=1, size=0.2) +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0),
                         colour = "blue", size = 0.5) +
-    ggplot2::ylim(c(min(deseq2_data$log2FoldChange),
-                    max(deseq2_data$log2FoldChange))) +
+    ggplot2::ylim(c(min(deseq2Data$log2FoldChange),
+                    max(deseq2Data$log2FoldChange))) +
     ggplot2::xlim(c(0.1, 50000)) +
     ggplot2::ggtitle("log-fold change vs. expression in DESeq2 data")  +
     ggplot2::scale_color_manual(values = c("  None" = "grey",
@@ -135,17 +135,17 @@ compMA <- function(deseq2_result,
                                   "  deseq2 edgeR" = "#009E73",
                                   "  edgeR" = "red3"))
 
-  logCPM <- edger_data$logCPM
-  logFC <- edger_data$logFC
-  tool <- edger_data$tool
+  logCPM <- edgerData$logCPM
+  logFC <- edgerData$logFC
+  tool <- edgerData$tool
 
-  m2 <- ggplot2::ggplot(data=edger_data,
+  m2 <- ggplot2::ggplot(data=edgerData,
                         ggplot2::aes(x=logCPM, y=logFC, color=tool)) +
     ggplot2::geom_point(alpha=1, size=0.2) +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0),
                         colour = "blue", size = 0.5) +
-    ggplot2::ylim(c(min(edger_data$logFC), max(edger_data$logFC))) +
-    ggplot2::xlim(c(min(edger_data$logCPM), max(edger_data$logCPM))) +
+    ggplot2::ylim(c(min(edgerData$logFC), max(edgerData$logFC))) +
+    ggplot2::xlim(c(min(edgerData$logCPM), max(edgerData$logCPM))) +
     ggplot2::ggtitle("log-fold change vs. expression in edgeR data")  +
     ggplot2::scale_color_manual(values = c("  None" = "grey",
                                   "  deseq2" = "#E69F00",

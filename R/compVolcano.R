@@ -7,8 +7,8 @@
 #' expressed. The results are meaningful to compare different tools only when the
 #' parameters used for both tools when performing the DGE analysis are similar.
 #'
-#' @param deseq2_result The result from DESeq2, a DESeqResults object.
-#' @param edger_result A data frame taken from the table component of the returned
+#' @param deseq2Result The result from DESeq2, a DESeqResults object.
+#' @param edgerResult A data frame taken from the table component of the returned
 #'    value of edgeR topTags function (edgeR::topTags(..)$table).
 #' @param cutoff padj cutoff. Default: 0.05
 #'
@@ -29,106 +29,106 @@
 #' dds <- DESeq2::DESeq(dds)
 #'
 #' res <- DESeq2::results(dds, tidy=TRUE)
-#' deseq2_res <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
+#' deseq2Res <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
 #'                                   type = "apeglm")
 #'
 #' # perform DGE analysis with edgeR
 #' counts <- data.frame(airwayCounts[,-1], row.names = airwayCounts$ensgene)
 #'
-#' diff_list <- edgeR::DGEList(counts, samples = airwayMetadata)
+#' diffList <- edgeR::DGEList(counts, samples = airwayMetadata)
 #'
 #' dex <- factor(rep(c("control", "treated"), 4))
 #' design <- model.matrix(~dex)
-#' rownames(design) <- colnames(diff_list)
+#' rownames(design) <- colnames(diffList)
 #'
-#' diff_list <- edgeR::estimateDisp(diff_list, design, robust = TRUE)
-#' fit <- edgeR::glmFit(diff_list, design)
+#' diffList <- edgeR::estimateDisp(diffList, design, robust = TRUE)
+#' fit <- edgeR::glmFit(diffList, design)
 #' lrt <- edgeR::glmLRT(fit)
-#' edger_res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
+#' edgerRes <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 #'
 #' # make the Volcano plots
-#' compVolcano(deseq2_result = deseq2_res,
-#'        edger_result = edger_res)
+#' compVolcano(deseq2Result = deseq2Res,
+#'        edgerResult = edgerRes)
 #'
 #' @export
 #' @import ggplot2
 #' @import gridExtra
 
-compVolcano <- function(deseq2_result,
-                        edger_result,
+compVolcano <- function(deseq2Result,
+                        edgerResult,
                         cutoff = 0.05) {
 
   # Performing checks of user input
-  if (!setequal(rownames(deseq2_result), rownames(edger_result))) {
-    stop("deseq2_result should contain same genes as edger_result.")
+  if (!setequal(rownames(deseq2Result), rownames(edgerResult))) {
+    stop("deseq2Result should contain same genes as edgerResult.")
   }
 
   if (cutoff <= 0 | cutoff > 1) {
     stop("Cutoff should be a positive number between 0 and 1.")
   }
 
-  if (!"DESeqResults" %in% class(deseq2_result)) {
-    stop("deseq2_result should be a DESeqResults object.")
+  if (!"DESeqResults" %in% class(deseq2Result)) {
+    stop("deseq2Result should be a DESeqResults object.")
   }
 
-  if ((!is.data.frame(edger_result) |
-       !all(attributes(edger_result)$names == c("logFC",
+  if ((!is.data.frame(edgerResult) |
+       !all(attributes(edgerResult)$names == c("logFC",
                                                 "logCPM",
                                                 "LR",
                                                 "PValue",
                                                 "FDR")))) {
-    stop("edger_result should be a data frame taken from the table component of the
+    stop("edgerResult should be a data frame taken from the table component of the
          returned value of edgeR topTags function.")
   }
 
   # get all differentially expressed genes with a padj <= cutoff
-  deseq2_diff_genes <- rownames(deseq2_result[which(
-    deseq2_result$padj <= cutoff & deseq2_result$log2FoldChange != 0),])
+  deseq2DiffGenes <- rownames(deseq2Result[which(
+    deseq2Result$padj <= cutoff & deseq2Result$log2FoldChange != 0),])
 
-  edger_diff_genes <- rownames(edger_result[which(
-    edger_result$FDR <= cutoff & edger_result$logFC != 0),])
+  edgerDiffGenes <- rownames(edgerResult[which(
+    edgerResult$FDR <= cutoff & edgerResult$logFC != 0),])
 
-  all_diff_genes <- union(deseq2_diff_genes, edger_diff_genes)
+  allDiffGenes <- union(deseq2DiffGenes, edgerDiffGenes)
 
   # Mark genes by the tools which consider them as differentially expressed
   # first use the result data from DESeq2
-  deseq2_data <- as.data.frame(cbind(deseq2_result,  tool=" "))
+  deseq2Data <- as.data.frame(cbind(deseq2Result,  tool=" "))
 
-  sel <- match(deseq2_diff_genes, rownames(deseq2_data))
-  deseq2_data$tool[sel] <- paste(deseq2_data$tool[sel], "deseq2", sep = " ")
+  sel <- match(deseq2DiffGenes, rownames(deseq2Data))
+  deseq2Data$tool[sel] <- paste(deseq2Data$tool[sel], "deseq2", sep = " ")
 
-  sel <- match(edger_diff_genes, rownames(deseq2_data))
-  deseq2_data$tool[sel] <- paste(deseq2_data$tool[sel], "edgeR", sep = " ")
+  sel <- match(edgerDiffGenes, rownames(deseq2Data))
+  deseq2Data$tool[sel] <- paste(deseq2Data$tool[sel], "edgeR", sep = " ")
 
-  sel <- which(deseq2_data$tool == " ")
-  deseq2_data$tool[sel] <- "  None"
+  sel <- which(deseq2Data$tool == " ")
+  deseq2Data$tool[sel] <- "  None"
 
   # use the result data from edgeR
-  edger_data <- as.data.frame(cbind(edger_result,  tool=" "))
+  edgerData <- as.data.frame(cbind(edgerResult,  tool=" "))
 
-  sel <- match(deseq2_diff_genes, rownames(edger_data))
-  edger_data$tool[sel] <- paste(edger_data$tool[sel], "deseq2", sep = " ")
+  sel <- match(deseq2DiffGenes, rownames(edgerData))
+  edgerData$tool[sel] <- paste(edgerData$tool[sel], "deseq2", sep = " ")
 
-  sel <- match(edger_diff_genes, rownames(edger_data))
-  edger_data$tool[sel] <- paste(edger_data$tool[sel], "edgeR", sep = " ")
+  sel <- match(edgerDiffGenes, rownames(edgerData))
+  edgerData$tool[sel] <- paste(edgerData$tool[sel], "edgeR", sep = " ")
 
-  sel <- which(edger_data$tool == " ")
-  edger_data$tool[sel] <- "  None"
+  sel <- which(edgerData$tool == " ")
+  edgerData$tool[sel] <- "  None"
 
   # plot the Volcano plot, with log 2 fold change as x-axis and -log10(padj)
   # as y axis
-  deseq2_data$padj <- -log(deseq2_data$padj, 10)
+  deseq2Data$padj <- -log(deseq2Data$padj, 10)
 
-  log2FoldChange <- deseq2_data$log2FoldChange
-  padj <- deseq2_data$padj
-  tool <- deseq2_data$tool
+  log2FoldChange <- deseq2Data$log2FoldChange
+  padj <- deseq2Data$padj
+  tool <- deseq2Data$tool
 
-  v1 <- ggplot2::ggplot(data=deseq2_data,
+  v1 <- ggplot2::ggplot(data=deseq2Data,
                   ggplot2::aes(x=log2FoldChange, y=padj, color=tool)) +
     ggplot2::geom_point(alpha=1, size=0.2) +
-    ggplot2::xlim(c(min(deseq2_data$log2FoldChange),
-                    max(deseq2_data$log2FoldChange))) +
-    ggplot2::ylim(c(min(deseq2_data$padj), max(deseq2_data$padj))) +
+    ggplot2::xlim(c(min(deseq2Data$log2FoldChange),
+                    max(deseq2Data$log2FoldChange))) +
+    ggplot2::ylim(c(min(deseq2Data$padj), max(deseq2Data$padj))) +
     ggplot2::labs(title="adjusted p-value vs. log-fold change in DESeq2 data",
                   x="log2 fold change",
                   y="-log10 padj") +
@@ -138,17 +138,17 @@ compVolcano <- function(deseq2_result,
                                            "  edgeR" = "red3"))
 
 
-  edger_data$FDR <- -log(edger_data$FDR, 10)
+  edgerData$FDR <- -log(edgerData$FDR, 10)
 
-  logFC <- edger_data$logFC
-  FDR <- edger_data$FDR
-  tool <- edger_data$tool
+  logFC <- edgerData$logFC
+  FDR <- edgerData$FDR
+  tool <- edgerData$tool
 
-  v2 <- ggplot2::ggplot(data=edger_data,
+  v2 <- ggplot2::ggplot(data=edgerData,
                   ggplot2::aes(x=logFC, y=FDR, color=tool)) +
     ggplot2::geom_point(alpha=1, size=0.2) +
-    ggplot2::xlim(c(min(edger_data$logFC), max(edger_data$logFC))) +
-    ggplot2::ylim(c(min(edger_data$FDR), max(edger_data$FDR))) +
+    ggplot2::xlim(c(min(edgerData$logFC), max(edgerData$logFC))) +
+    ggplot2::ylim(c(min(edgerData$FDR), max(edgerData$FDR))) +
     ggplot2::labs(title="adjusted p-value vs. log-fold change in edgeR data",
                   x="log2 fold change",
                   y="-log10 padj") +

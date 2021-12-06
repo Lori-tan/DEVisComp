@@ -6,8 +6,8 @@
 #' correlation and complete method based on the normalized counts to obtain the
 #' clustering order.
 #'
-#' @param normalized_counts The normailized counts of the RNA-seq data.
-#' @param DE_result The result from DESeq2 or edgeR, which should be a DESeqResults
+#' @param normalizedCounts The normailized counts of the RNA-seq data.
+#' @param DEResult The result from DESeq2 or edgeR, which should be a DESeqResults
 #'    object or a data frame taken from the table component of the returned value
 #'    of edgeR topTags function (edgeR::topTags(..)$table).
 #' @param tool The tool used for DGE analysis, "DESeq2" or "edgeR".
@@ -25,7 +25,7 @@
 #'                                       tidy=TRUE)
 #' dds <- DESeq2::estimateSizeFactors(dds)
 #'
-#' normalized_counts <- DESeq2::counts(dds, normalized=TRUE)
+#' normalizedCounts <- DESeq2::counts(dds, normalized=TRUE)
 #'
 #' dds@colData$dex <- relevel(dds@colData$dex, ref = "control")
 #' dds <- DESeq2::DESeq(dds)
@@ -34,8 +34,8 @@
 #' shrinkResult <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
 #'                                   type = "apeglm")
 #' # plot heatmaps
-#' ClusterTogether(normalized_counts = normalized_counts,
-#'                             DE_result = shrinkResult,
+#' ClusterTogether(normalizedCounts = normalizedCounts,
+#'                             DEResult = shrinkResult,
 #'                             tool = "DESeq2")
 #'
 #' # Example 2: DGE analysis result from edgeR
@@ -43,22 +43,22 @@
 #' counts <- data.frame(airwayCounts[,-1], row.names = airwayCounts$ensgene)
 #'
 #' # perform DGE analysis with edgeR
-#' diff_list <- edgeR::DGEList(counts, samples = airwayMetadata)
+#' diffList <- edgeR::DGEList(counts, samples = airwayMetadata)
 #'
-#' normalized_counts <- edgeR::cpm(diff_list, normalized.lib.sizes = TRUE)
+#' normalizedCounts <- edgeR::cpm(diffList, normalized.lib.sizes = TRUE)
 #'
 #' dex <- factor(rep(c("control", "treated"), 4))
 #' design <- model.matrix(~dex)
-#' rownames(design) <- colnames(diff_list)
+#' rownames(design) <- colnames(diffList)
 #'
-#' diff_list <- edgeR::estimateDisp(diff_list, design, robust = TRUE)
-#' fit <- edgeR::glmFit(diff_list, design)
+#' diffList <- edgeR::estimateDisp(diffList, design, robust = TRUE)
+#' fit <- edgeR::glmFit(diffList, design)
 #' lrt <- edgeR::glmLRT(fit)
 #' res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 #'
 #' # plot heatmaps
-#' ClusterTogether(normalized_counts = normalized_counts,
-#'                            DE_result = res,
+#' ClusterTogether(normalizedCounts = normalizedCounts,
+#'                            DEResult = res,
 #'                            tool = "edgeR")
 #'
 #' @export
@@ -68,22 +68,22 @@
 #' @import grDevices
 #' @import cowplot
 
-ClusterTogether <- function(normalized_counts,
-                            DE_result,
+ClusterTogether <- function(normalizedCounts,
+                            DEResult,
                             tool) {
 
   # Performing checks of user input
-  if (!is.numeric(normalized_counts)) {
-    stop("Normalized_counts should be a numeric matirx containing the normalized
+  if (!is.numeric(normalizedCounts)) {
+    stop("normalizedCounts should be a numeric matirx containing the normalized
          count of genes.")
   }
 
-  if (!is.matrix(normalized_counts) & !is.data.frame(normalized_counts)) {
-    stop("Normalized_counts should be a matirx or data frame.")
+  if (!is.matrix(normalizedCounts) & !is.data.frame(normalizedCounts)) {
+    stop("normalizedCounts should be a matirx or data frame.")
   }
 
-  if (!setequal(rownames(normalized_counts), rownames(DE_result))) {
-    stop("Rownames of normalized_counts should matches the rownames of DE_result,
+  if (!setequal(rownames(normalizedCounts), rownames(DEResult))) {
+    stop("Rownames of normalizedCounts should matches the rownames of DEResult,
          i.e. they should contain same genes.")
   }
 
@@ -91,12 +91,12 @@ ClusterTogether <- function(normalized_counts,
     stop("Tool should be either DESeq2 or edgeR.")
   }
 
-  if (tool == "DESeq2" & !"DESeqResults" %in% class(DE_result)) {
-    stop("DE_result should be a DESeqResults object.")
+  if (tool == "DESeq2" & !"DESeqResults" %in% class(DEResult)) {
+    stop("DEResult should be a DESeqResults object.")
   }
 
-  if (tool == "edgeR" & (!is.data.frame(DE_result) |
-       !all(attributes(DE_result)$names == c("logFC",
+  if (tool == "edgeR" & (!is.data.frame(DEResult) |
+       !all(attributes(DEResult)$names == c("logFC",
                                               "logCPM",
                                               "LR",
                                               "PValue",
@@ -104,37 +104,37 @@ ClusterTogether <- function(normalized_counts,
             )
        )
       ) {
-    stop("DE_result should be a data frame taken from the table component of the
+    stop("DEResult should be a data frame taken from the table component of the
          returned value of edgeR topTags function.")
   }
 
   # get the significant genes (adjusted p-value <= 0.05) that are differentially
   # expressed
   if (tool == "DESeq2") {
-    diff_df <- as.data.frame(DE_result[which(DE_result$padj <= 0.05
-                                             & DE_result$log2FoldChange != 0),])
+    diffDf <- as.data.frame(DEResult[which(DEResult$padj <= 0.05
+                                             & DEResult$log2FoldChange != 0),])
   } else if (tool == "edgeR") {
-    diff_df <- as.data.frame(DE_result[which(DE_result$FDR <= 0.05
-                                             & DE_result$logFC != 0), ])
+    diffDf <- as.data.frame(DEResult[which(DEResult$FDR <= 0.05
+                                             & DEResult$logFC != 0), ])
   }
 
-  diff_counts <- normalized_counts[match(rownames(diff_df),
-                                         rownames(normalized_counts)),]
+  diffCounts <- normalizedCounts[match(rownames(diffDf),
+                                         rownames(normalizedCounts)),]
   # get the log 3 value of the counts in order to make the plots more readable.
-  diff_counts <- log(diff_counts + 0.001, 3)
+  diffCounts <- log(diffCounts + 0.001, 3)
 
   # if the user doesn't provide clustering order, we cluster based on the
   # normalized counts of one replicate (control vs treated) and get the order
 
   # we only want the rows with a non-zero SD for clustering purpose
-  SD <- apply(diff_counts[, c(1, 2)], 1, stats::sd)
+  SD <- apply(diffCounts[, c(1, 2)], 1, stats::sd)
   if (length(which(SD == 0)) != 0) {
     warning(sprintf("Removing %d rows when clustering due to zero SD in the first two column of normalized counts.",
                     length(which(SD == 0)) != 0))
-    diff_counts <- diff_counts[-which(SD == 0), ]
+    diffCounts <- diffCounts[-which(SD == 0), ]
   }
 
-  p <- pheatmap::pheatmap(diff_counts[, c(1, 2)],
+  p <- pheatmap::pheatmap(diffCounts[, c(1, 2)],
                 cluster_cols=FALSE,
                 cluster_rows=TRUE,
                 clustering_distance_rows = 'correlation',
@@ -153,14 +153,14 @@ ClusterTogether <- function(normalized_counts,
 
   # get heatmap for the counts
   # get the lower and upper limits used for color
-  limit <- stats::quantile(diff_counts, probs = c(0.05, 0.95))
-  my_colors <- c(limit[1] - 0.01,
+  limit <- stats::quantile(diffCounts, probs = c(0.05, 0.95))
+  myColors <- c(limit[1] - 0.01,
                  seq(limit[1], limit[2], by=0.01),
                  limit[2] + 0.01)
-  my_palette <- c(grDevices::colorRampPalette(colors = c("white", "yellow", "red"))
-                  (n = length(my_colors) - 2), 'red')
+  myPalette <- c(grDevices::colorRampPalette(colors = c("white", "yellow", "red"))
+                  (n = length(myColors) - 2), 'red')
 
-  p1 <- pheatmap::pheatmap(diff_counts[order,],
+  p1 <- pheatmap::pheatmap(diffCounts[order,],
                 cluster_cols=FALSE,
                 cluster_rows=FALSE,
                 clustering_distance_rows = 'correlation',
@@ -172,31 +172,31 @@ ClusterTogether <- function(normalized_counts,
                 show_rownames = FALSE,
                 main = 'normalized count',
                 cellheight = 0.3,
-                color = my_palette,
-                breaks = my_colors
+                color = myPalette,
+                breaks = myColors
   )
 
   # re-order the DE result
-  reordered_results <- diff_df[match(rownames(diff_counts[order,]),
-                                     rownames(diff_df)),]
+  reorderedResults <- diffDf[match(rownames(diffCounts[order,]),
+                                     rownames(diffDf)),]
 
   if (tool == "DESeq2"){
-    lfc <- reordered_results$log2FoldChange
-    padj <- reordered_results$padj
+    lfc <- reorderedResults$log2FoldChange
+    padj <- reorderedResults$padj
   } else if (tool == "edgeR") {
-    lfc <- reordered_results$logFC
-    padj <- reordered_results$FDR
+    lfc <- reorderedResults$logFC
+    padj <- reorderedResults$FDR
   }
 
   # get heatmap for log 2 fold change
   limit <- stats::quantile(lfc, probs = c(0.05, 0.95))
-  my_colors <- c(limit[1] - 0.01,
+  myColors <- c(limit[1] - 0.01,
                  seq(limit[1], limit[2], by=0.01),
                  limit[2] + 0.01)
-  my_palette <- c('blue',
+  myPalette <- c('blue',
                   grDevices::colorRampPalette(
                     rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))
-                  (n = length(my_colors)-2), 'red')
+                  (n = length(myColors)-2), 'red')
 
   p2 <- pheatmap::pheatmap(lfc,
                  cluster_cols=FALSE,
@@ -210,14 +210,14 @@ ClusterTogether <- function(normalized_counts,
                  show_rownames = FALSE,
                  main = 'LFC',
                  cellheight = 0.3,
-                 color = my_palette,
-                 breaks = my_colors
+                 color = myPalette,
+                 breaks = myColors
   )
 
   # get heatmap for adjusted p-value
-  my_colors <- c(seq(0,0.05,by=0.0001), 0.0501)
-  my_palette <- c(grDevices::colorRampPalette(colors = c("yellow", "red"))
-                  (n = length(my_colors)-2), 'red')
+  myColors <- c(seq(0,0.05,by=0.0001), 0.0501)
+  myPalette <- c(grDevices::colorRampPalette(colors = c("yellow", "red"))
+                  (n = length(myColors)-2), 'red')
 
   p3 <- pheatmap::pheatmap(padj,
                  cluster_cols=FALSE,
@@ -231,8 +231,8 @@ ClusterTogether <- function(normalized_counts,
                  show_rownames = FALSE,
                  main = 'Padj',
                  cellheight = 0.3,
-                 color = my_palette,
-                 breaks = my_colors
+                 color = myPalette,
+                 breaks = myColors
   )
 
   # plot three heatmaps side by side

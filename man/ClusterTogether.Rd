@@ -4,12 +4,12 @@
 \alias{ClusterTogether}
 \title{Draw clustered heatmaps for DGE results.}
 \usage{
-ClusterTogether(normalized_counts, DE_result, tool)
+ClusterTogether(normalizedCounts, DEResult, tool)
 }
 \arguments{
-\item{normalized_counts}{The normailized counts of the RNA-seq data.}
+\item{normalizedCounts}{The normailized counts of the RNA-seq data.}
 
-\item{DE_result}{The result from DESeq2 or edgeR, which should be a DESeqResults
+\item{DEResult}{The result from DESeq2 or edgeR, which should be a DESeqResults
 object or a data frame taken from the table component of the returned value
 of edgeR topTags function (edgeR::topTags(..)$table).}
 
@@ -36,7 +36,7 @@ dds <- DESeq2::DESeqDataSetFromMatrix(countData=airwayCounts,
                                       tidy=TRUE)
 dds <- DESeq2::estimateSizeFactors(dds)
 
-normalized_counts <- DESeq2::counts(dds, normalized=TRUE)
+normalizedCounts <- DESeq2::counts(dds, normalized=TRUE)
 
 dds@colData$dex <- relevel(dds@colData$dex, ref = "control")
 dds <- DESeq2::DESeq(dds)
@@ -45,8 +45,8 @@ res <- DESeq2::results(dds, tidy=TRUE)
 shrinkResult <- DESeq2::lfcShrink(dds, coef = "dex_treated_vs_control",
                                   type = "apeglm")
 # plot heatmaps
-ClusterTogether(normalized_counts = normalized_counts,
-                            DE_result = shrinkResult,
+ClusterTogether(normalizedCounts = normalizedCounts,
+                            DEResult = shrinkResult,
                             tool = "DESeq2")
 
 # Example 2: DGE analysis result from edgeR
@@ -54,22 +54,22 @@ ClusterTogether(normalized_counts = normalized_counts,
 counts <- data.frame(airwayCounts[,-1], row.names = airwayCounts$ensgene)
 
 # perform DGE analysis with edgeR
-diff_list <- edgeR::DGEList(counts, samples = airwayMetadata)
+diffList <- edgeR::DGEList(counts, samples = airwayMetadata)
 
-normalized_counts <- edgeR::cpm(diff_list, normalized.lib.sizes = TRUE)
+normalizedCounts <- edgeR::cpm(diffList, normalized.lib.sizes = TRUE)
 
 dex <- factor(rep(c("control", "treated"), 4))
 design <- model.matrix(~dex)
-rownames(design) <- colnames(diff_list)
+rownames(design) <- colnames(diffList)
 
-diff_list <- edgeR::estimateDisp(diff_list, design, robust = TRUE)
-fit <- edgeR::glmFit(diff_list, design)
+diffList <- edgeR::estimateDisp(diffList, design, robust = TRUE)
+fit <- edgeR::glmFit(diffList, design)
 lrt <- edgeR::glmLRT(fit)
 res <- edgeR::topTags(lrt, n = dim(lrt)[1])$table
 
 # plot heatmaps
-ClusterTogether(normalized_counts = normalized_counts,
-                           DE_result = res,
+ClusterTogether(normalizedCounts = normalizedCounts,
+                           DEResult = res,
                            tool = "edgeR")
 
 }
