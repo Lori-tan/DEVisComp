@@ -87,17 +87,17 @@ ClusterTogether <- function(normalizedCounts,
                             DEResult,
                             tool) {
 
-  # Performing checks of user input
-  if (!is.numeric(normalizedCounts)) {
+  # == Performing checks of user input ====
+  if (! is.numeric(normalizedCounts)) {
     stop("normalizedCounts should be a numeric matirx containing the normalized
          count of genes.")
   }
 
-  if (!is.matrix(normalizedCounts) & !is.data.frame(normalizedCounts)) {
+  if (! is.matrix(normalizedCounts) & ! is.data.frame(normalizedCounts)) {
     stop("normalizedCounts should be a matirx or data frame.")
   }
 
-  if (!setequal(rownames(normalizedCounts), rownames(DEResult))) {
+  if (! setequal(rownames(normalizedCounts), rownames(DEResult))) {
     stop("Rownames of normalizedCounts should matches the rownames of DEResult,
          i.e. they should contain same genes.")
   }
@@ -106,11 +106,11 @@ ClusterTogether <- function(normalizedCounts,
     stop("Tool should be either DESeq2 or edgeR.")
   }
 
-  if (tool == "DESeq2" & !"DESeqResults" %in% class(DEResult)) {
+  if (tool == "DESeq2" & ! "DESeqResults" %in% class(DEResult)) {
     stop("DEResult should be a DESeqResults object.")
   }
 
-  if (tool == "edgeR" & (!is.data.frame(DEResult) |
+  if (tool == "edgeR" & (! is.data.frame(DEResult) |
        !all(attributes(DEResult)$names == c("logFC",
                                               "logCPM",
                                               "LR",
@@ -123,8 +123,9 @@ ClusterTogether <- function(normalizedCounts,
          returned value of edgeR topTags function.")
   }
 
-  # get the significant genes (adjusted p-value <= 0.05) that are differentially
-  # expressed
+  # == Body ====
+  # get the significant genes (adjusted p-value <= 0.05) that are
+  # differentially expressed
   if (tool == "DESeq2") {
     diffDf <- as.data.frame(DEResult[which(DEResult$padj <= 0.05
                                              & DEResult$log2FoldChange != 0),])
