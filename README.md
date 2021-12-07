@@ -29,7 +29,11 @@ devtools::install_github("Lori-tan/DEVisComp", build_vignettes = TRUE)
 library("DEVisComp")
 ```
 
-To run the Shiny app: Under construction
+To run the Shiny app:
+
+``` r
+runDEVisComp()
+```
 
 ## Overview
 
@@ -76,9 +80,6 @@ Pennsylvania as examples and exports them as data available to users.
 Auguie, B. (2017). gridExtra: Miscellaneous Functions for “Grid”
 Graphics. R package version 2.3.
 <https://CRAN.R-project.org/package=gridExtra>
-
-BioRender. (2021). Image created by Tan, L. Retrieved Novemver 15, 2021,
-from <https://app.biorender.com/>
 
 Chen, H. (2021). VennDiagram: Generate High-Resolution Venn and Euler
 Plots. R package version 1.7.0.
