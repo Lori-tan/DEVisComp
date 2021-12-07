@@ -1,0 +1,12 @@
+citHeader("To cite DEVisComp in publications use:")
+
+citEntry(
+  entry    = "Unpublished",
+  title    = "DEVisComp: an R package for visualizing and comparing the differential expression analysis results from R packages DESeq2 and edgeR",
+  author   = "Luomeng Tan",
+  note  = "Unpublished",
+  year     = "2021",
+  textVersion = paste(
+    "Tan, L. (2021) DEVisComp: an R package for visualizing and comparing the differential expression analysis results from R packages DESeq2 and edgeR. Unpublished. URL https://github.com/Lori-tan/DEVisComp"
+  )
+)
