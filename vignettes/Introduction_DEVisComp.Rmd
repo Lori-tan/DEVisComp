@@ -103,6 +103,10 @@ There are 4 functions in the package, and all functions require DESeq2 and/or ed
     BiocManager::install("edgeR")
   }
   
+  if (! requireNamespace("statmod", quietly=TRUE)) {
+    install.packages("statmod")
+  }
+  
   counts <- data.frame(airwayCounts[,-1], row.names = airwayCounts$ensgene)
   diffList <- edgeR::DGEList(counts, samples = airwayMetadata)
   
