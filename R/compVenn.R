@@ -108,7 +108,7 @@ compVenn <- function(deseq2Result,
                             width = 4000,
                             height = 4000,
                             cat.pos = 0,
-                            main = "The number of differentally expressed genes detected\n by DESeq2 or/and edgeR",
+                            main = "The number of differentially expressed genes detected\n by DESeq2 or/and edgeR",
                             main.cex = 2,
                             margin = 0.1)
 

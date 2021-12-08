@@ -85,4 +85,4 @@ Zhu, A., Ibrahim, J. G., Love, M. I. (2018). Heavy-tailed prior distributions fo
   
 ## Acknowledgements
 
-This package was developed as part of an assessment for 2021 BCB410H: Applied Bioinfor- matics, University of Toronto, Toronto, CANADA.
+This package was developed as part of an assessment for 2021 BCB410H: Applied Bioinformatics, University of Toronto, Toronto, CANADA.
